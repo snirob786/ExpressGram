@@ -13,10 +13,8 @@ initializePassport(passport, email => {
         return users.find(user => user.id === id)
 })
 
-const users = [];
-
-app.set('view engine', 'ejs');
-app.use(express.urlencoded({ extended: false }))
+app.set('view engine','ejs');
+app.use(express.urlencoded({ extended: false}))
 app.use(flash())
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -51,6 +49,7 @@ app.post('/register', async (req, res) => {
         });
         console.log("Profile: ", users);
         res.redirect('/login')
+        
     } catch {
         res.redirect('/register')
     }
