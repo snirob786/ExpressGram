@@ -134,19 +134,23 @@ app.post('/login', passport.authenticate('local', { failureRedirect: '/login', s
 
 // Profile: get
 app.get('/profile', isUserAuthenticated, (req, res) => {
-    console.log("file data: ",req.file)
-    if (req.filename !== "") {
-        res.render("profile", { title: `Welcome ${req.user.name}`, pageName: 'profile' })
+    try {
+        const userInfo = User.findOne({email:req.user.email});
+    } catch (error) {
+        
     }
-    else{
-        res.render("profile", { title: `Welcome ${req.user.name}`, pageName: 'profile' })
-    }
+    res.render("profile", { title: `Welcome ${req.user.name}`, pageName: 'profile' })
 })
 
 // Profile: post
-app.post('/profile', upload.single('imageUpload'), (req, res) => {
-    console.log(req.file)
-    // res.status(200).redirect('/profile');
+app.post('/profile', upload.single('imageUpload'), async (req, res) => {
+    try {
+        const userUpdate = User.updateOne({email: req.body.email}, );
+        await newUser.save();
+        res.status(200).redirect('/profile');
+    } catch (error) {
+        res.status(500).send("File not uploaded").redirect('/profile')
+    }
 })
 
 // Logout: get
