@@ -13,6 +13,32 @@ const MongoStore = require('connect-mongo');
 const redis = require('redis');
 const connectRedis = require('connect-redis');
 const RedisStore = connectRedis(session);
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './uploads/');
+    },
+
+    filename: (req, file, cb) => {
+        const fileExt = path.extname(file.originalname);
+        const fileName = file.originalname.replace(fileExt, "").toLowerCase().split(" ").join("-") + "-" + Date.now();
+        cb(null, fileName + fileExt);
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1000 * 1000 // filesize in kb
+    },
+    fileFilter: (req, file, cb) => {
+        (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") ?
+            cb(null, true) :
+            cb({ message: "Only png,jpg and jpeg files are allowed" })
+    }
+})
 
 //Configure redis client
 const redisClient = redis.createClient({
@@ -108,12 +134,19 @@ app.post('/login', passport.authenticate('local', { failureRedirect: '/login', s
 
 // Profile: get
 app.get('/profile', isUserAuthenticated, (req, res) => {
-    res.render("profile", { title: `Welcome ${req.user.name}`, pageName: 'profile' })
+    console.log("file data: ",req.file)
+    if (req.filename !== "") {
+        res.render("profile", { title: `Welcome ${req.user.name}`, pageName: 'profile' })
+    }
+    else{
+        res.render("profile", { title: `Welcome ${req.user.name}`, pageName: 'profile' })
+    }
 })
 
 // Profile: post
-app.post('/profile', (req, res) => {
-    console.log("profile page")
+app.post('/profile', upload.single('imageUpload'), (req, res) => {
+    console.log(req.file)
+    // res.status(200).redirect('/profile');
 })
 
 // Logout: get

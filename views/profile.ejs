@@ -4,5 +4,15 @@
             <h2 class="h3">
                 <%= title %>
             </h2>
+
+            <form action="/profile" class="row g-3" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="formFile" class="form-label">upload your image here</label>
+                    <input class="form-control" type="file" id="formFile" name="imageUpload">
+                  </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-3">Submit</button>
+                </div>
+            </form>
     </div>
     <% include('footer') %>
