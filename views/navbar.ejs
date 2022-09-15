@@ -9,16 +9,16 @@
                   <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                       <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Home</a>
+                        <a class="nav-link <%= pageName === 'home' && 'active' %>" aria-current="page" href="/">Home</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" href="/profile">Profile</a>
+                        <a class="nav-link <%= pageName === 'profile' && 'active' %>" href="/profile">Profile</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" href="/login">Login</a>
+                        <a class="nav-link <%= pageName === 'login' && 'active' %>" href="/login">Login</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" href="/register">Register</a>
+                        <a class="nav-link <%= pageName === 'register' && 'active' %>" href="/register">Register</a>
                       </li>
                       <li class="nav-item">
                         <a class="nav-link" href="/logout">Logout</a>

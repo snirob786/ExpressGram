@@ -10,24 +10,41 @@ const User = require("./models/user.model");
 const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const redis = require('redis');
+const connectRedis = require('connect-redis');
+const RedisStore = connectRedis(session);
 
+//Configure redis client
+const redisClient = redis.createClient({
+    host: 'localhost',
+    port: 6379,
+    legacyMode: true
+});
+redisClient.connect().catch(console.error)
+redisClient.on('error', (err) => {
+    console.log('Could not establish a connection with redis. ' + err);
+});
+redisClient.on('connect', (err) => {
+    console.log('Connected to redis successfully');
+});
 app.set("view engine", "ejs");
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.set('trust proxy', 1) // trust first proxy
+
 app.use(session({
-    secret: 'keyboard cat',
+    secret: 'expressgramRedis',
     resave: false,
     saveUninitialized: true,
-    store: MongoStore.create({
-        mongoUrl: `mongodb://localhost:27017/${process.env.MONGO_DB_NAME}`,
-        collectionName: "sessions",
-        ttl: 60
-    })
-    //   cookie: { secure: true }
-}));
+    store: new RedisStore({ client: redisClient }),
+    cookie: {
+        secure: false, //if true then need https
+        httpOnly: true, // if true prevents client site from accessing
+        maxAge: 1000 * 60 //session time in milliseconds
+    }
+}))
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -49,12 +66,13 @@ const isUserAuthenticated = (req, res, next) => {
 
 // Homepage
 app.get('/', (req, res) => {
-    res.render("index", { title: "Express Gram Homepage" })
+    console.log(req.session);
+    res.render("index", { title: "Express Gram Homepage", pageName: 'home' })
 })
 
 // Register: get
 app.get('/register', isLoggedIn, (req, res) => {
-    res.render("register", { title: "Express Gram Register" })
+    res.render("register", { title: "Express Gram Register", pageName: 'register' })
 })
 
 // Register: post
@@ -82,7 +100,7 @@ app.post('/register', async (req, res) => {
 
 // Login: get
 app.get('/login', isLoggedIn, (req, res) => {
-    res.render("login", { title: "Express Gram Login" })
+    res.render("login", { title: "Express Gram Login", pageName: 'login' })
 })
 
 // Login: post
@@ -90,7 +108,12 @@ app.post('/login', passport.authenticate('local', { failureRedirect: '/login', s
 
 // Profile: get
 app.get('/profile', isUserAuthenticated, (req, res) => {
-    res.render("profile", { title: `Welcome ${req.user.name}`})
+    res.render("profile", { title: `Welcome ${req.user.name}`, pageName: 'profile' })
+})
+
+// Profile: post
+app.post('/profile', (req, res) => {
+    console.log("profile page")
 })
 
 // Logout: get
