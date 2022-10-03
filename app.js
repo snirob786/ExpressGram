@@ -135,9 +135,9 @@ app.post('/login', passport.authenticate('local', { failureRedirect: '/login', s
 // Profile: get
 app.get('/profile', isUserAuthenticated, (req, res) => {
     try {
-        const userInfo = User.findOne({email:req.user.email});
+        const userInfo = User.findOne({ email: req.user.email });
     } catch (error) {
-        
+
     }
     res.render("profile", { title: `Welcome ${req.user.name}`, pageName: 'profile' })
 })
@@ -145,11 +145,21 @@ app.get('/profile', isUserAuthenticated, (req, res) => {
 // Profile: post
 app.post('/profile', upload.single('imageUpload'), async (req, res) => {
     try {
-        const userUpdate = User.updateOne({email: req.body.email}, );
-        await newUser.save();
+        const user = await User.findOne({ email: req.user.email });
+        const userUpdate = await User.updateOne(
+            { email: req.user.email },
+            {
+                $set: {
+                    profilePic: req.file.path
+                }
+            },
+            );
+            console.log("user info: ",user)
+        console.log("Data update testing: ", userUpdate);
         res.status(200).redirect('/profile');
     } catch (error) {
-        res.status(500).send("File not uploaded").redirect('/profile')
+        // res.status(500).send("File not uploaded").redirect('/profile')
+        res.status(500).send(error).redirect('/profile')
     }
 })
 
